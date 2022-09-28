@@ -4,7 +4,7 @@
 
 <https://www.websequencediagrams.com/>
 
-```mermaid
+```text
 note over browser:
 User type somethings in form then click save
 end note

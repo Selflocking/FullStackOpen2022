@@ -4,7 +4,7 @@
 
 <https://www.websequencediagrams.com/>
 
-```mermaid
+```text
 browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/spa
 server-->browser: HTML-code
 browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
