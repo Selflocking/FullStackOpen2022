@@ -1,110 +1,75 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
-const Filter = ({ value, onChange }) => {
-
-    return (
-        <div>
-            filter shown with <input value={value} onChange={onChange} />
-        </div>
-    )
-}
-
-const PersonForm = ({ handleSubmit, newName, handleNameChange, newNumber, handleNumberChange }) => {
-    return (
-        <form onSubmit={handleSubmit}>
+const ShowCountries = ({ countries }) => {
+    // console.log(countries.length);
+    if (countries.length > 10) {
+        return (
             <div>
-                name: <input value={newName} onChange={handleNameChange} />
+                Too many matches, specify another filter
             </div>
+        )
+    }
+    if (countries.length > 1) {
+        return (
             <div>
-                number: <input value={newNumber} onChange={handleNumberChange} />
+                {countries.map((country) => {
+                    return <p key={country.ccn3}>{country.name.common}</p>
+                })}
             </div>
+        )
+    }
+    if (countries.length === 1) {
+        const country = countries[0]
+        // Object.values(): object to array
+        return (
             <div>
-                <button type="submit">add</button>
+                <h3>{country.name.common}</h3>
+                <div>capital {country.capital[0]}</div>
+                <div>area {country.area}</div>
+                <h4>languages:</h4>
+                <ul>
+                    {Object.values(country.languages).map((language) => {
+                        return <li key={language}>{language}</li>
+                    })}
+                </ul>
+                <img alt="flag" src={country.flags.svg} width="150" />
             </div>
-        </form>
-    )
-}
-
-const Persons = ({ personsToShow }) => {
-    return (
-        <div>
-            {personsToShow.map((person) =>
-                <p key={person.name}>{person.name} {person.number}</p>
-            )}
-        </div>
-    )
+        )
+    }
 }
 
 const App = () => {
-    const [persons, setPersons] = useState([])
-
-    const [newName, setNewName] = useState('')
-    const [newNumber, setNewNumber] = useState('')
+    const [countries, setCountries] = useState([])
+    const [done, setDone] = useState(false)
     const [search, setSearch] = useState('')
 
     useEffect(() => {
         axios
-            .get('http://localhost:3001/persons')
+            .get("https://restcountries.com/v3.1/all")
             .then((response) => {
-                setPersons(response.data)
+                setCountries(response.data)
+                setDone(true)
             })
     }, [])
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        if (newName === '') {
-            alert('Please enter a name')
-            return;
-        }
-        if (newNumber === '') {
-            alert('Please enter the phone number')
-            return;
-        }
-        let isNameRepeat = false;
-        let isNumberRepeat = false;
-        persons.forEach((person) => {
-            if ((person.name) === newName) isNameRepeat = true
-            if (person.number === newNumber) isNumberRepeat = true
-        })
-        if (isNameRepeat) {
-            alert(`${newName} is already added to phonebook`)
-        } else if (isNumberRepeat) {
-            alert(`${newNumber} is already added to phonebook`)
-        } else {
-            setPersons(persons.concat({ "name": newName, number: newNumber }))
-        }
-        setNewName('')
-        setNewNumber('')
-    }
 
-    const handleNameChange = (event) => {
-        setNewName(event.target.value)
-    }
-
-    const handleNumberChange = (event) => {
-        setNewNumber(event.target.value)
-    }
-
-    const handleSearchChange = (event) => {
+    const handleSearch = (event) => {
         setSearch(event.target.value)
     }
 
-    const personsToShow = search === '' ? persons : persons.filter((person) => person.name.toLowerCase().includes(search.toLowerCase()))
+    const countriesToShow = done ? countries.filter((country) => {
+        // console.log(country.name.common)    
+        return country.name.common.toLowerCase().includes(search.toLowerCase())
+    }) : []
+    // const countriesToShow = done?[countries[1]]:[];
+    // console.log(countriesToShow);
 
     return (
         <div>
-            <h2>Phonebook</h2>
-            <Filter value={search} onChange={handleSearchChange} />
-            <h3>add a new</h3>
-            <PersonForm
-                handleSubmit={handleSubmit}
-                newName={newName}
-                handleNameChange={handleNameChange}
-                newNumber={newNumber}
-                handleNumberChange={handleNumberChange}
-            />
-            <h3>Numbers</h3>
-            <Persons personsToShow={personsToShow} />
+            <div>
+                find countries <input value={search} onChange={handleSearch} />
+            </div>
+            <ShowCountries countries={countriesToShow} />
         </div>
     )
 }
