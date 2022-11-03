@@ -1,7 +1,34 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
+const CountryInfo = ({ country }) => {
+    return (
+        <div>
+            <h3>{country.name.common}</h3>
+            <div>capital {country.capital[0]}</div>
+            <div>area {country.area}</div>
+            <h4>languages:</h4>
+            <ul>
+                {Object.values(country.languages).map((language) => {
+                    return <li key={language}>{language}</li>
+                })}
+            </ul>
+            <img alt="flag" src={country.flags.svg} width="150" />
+        </div>
+    )
+}
+
 const ShowCountries = ({ countries }) => {
+    const [show, setShow] = useState()
+    // console.log(show); undefined
+    const handleShow = (props) => {
+        setShow(props)
+    }
+    if (show !== undefined) {
+        return (
+            <CountryInfo country={show} />
+        )
+    }
     // console.log(countries.length);
     if (countries.length > 10) {
         return (
@@ -14,27 +41,19 @@ const ShowCountries = ({ countries }) => {
         return (
             <div>
                 {countries.map((country) => {
-                    return <p key={country.ccn3}>{country.name.common}</p>
+                    return (
+                        <div key={country.ccn3}>
+                            {country.name.common} <button onClick={() => { handleShow(country) }}>show</button>
+                        </div>
+                    )
                 })}
             </div>
         )
     }
     if (countries.length === 1) {
-        const country = countries[0]
         // Object.values(): object to array
         return (
-            <div>
-                <h3>{country.name.common}</h3>
-                <div>capital {country.capital[0]}</div>
-                <div>area {country.area}</div>
-                <h4>languages:</h4>
-                <ul>
-                    {Object.values(country.languages).map((language) => {
-                        return <li key={language}>{language}</li>
-                    })}
-                </ul>
-                <img alt="flag" src={country.flags.svg} width="150" />
-            </div>
+            <CountryInfo country={countries[0]} />
         )
     }
 }
