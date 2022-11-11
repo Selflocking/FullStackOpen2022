@@ -1,125 +1,87 @@
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-
-const CountryWeather = ({ capital }) => {
-    const [weather, setWeather] = useState()
-    useEffect(() => {
-        const api_key = process.env.REACT_APP_API_KEY
-        axios
-            .get(`http://api.openweathermap.org/data/2.5/weather?q=${capital}&appid=${api_key}`)
-            .then((response) => {
-                setWeather(response.data)
-            })
-    }, [capital])
-    // console.log(weather);
-    if (weather !== undefined) {
-        return (
-            <>
-                <div>temperature {(weather.main.temp - 273.15).toFixed(2)} Celcius</div>
-                <img alt="weather" src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}></img>
-                <div>wind: {weather.wind.speed} m/s</div>
-            </>
-        )
-    } else {
-        return (
-            <>
-                <div>Loading...</div>
-            </>
-        )
-    }
-
-}
-
-const CountryInfo = ({ country }) => {
-    return (
-        <div>
-            <h3>{country.name.common}</h3>
-            <div>capital {country.capital[0]}</div>
-            <div>area {country.area}</div>
-            <h5>languages:</h5>
-            <ul>
-                {Object.values(country.languages).map((language) => {
-                    return <li key={language}>{language}</li>
-                })}
-            </ul>
-            <img alt="flag" src={country.flags.svg} width="150" />
-            <h4>Weather in {country.capital[0]}</h4>
-            <CountryWeather capital={country.capital[0]} />
-        </div>
-    )
-}
-
-const ShowCountries = ({ countries }) => {
-    const [show, setShow] = useState()
-    // console.log(show); undefined
-    const handleShow = (props) => {
-        setShow(props)
-    }
-    if (show !== undefined) {
-        return (
-            <CountryInfo country={show} />
-        )
-    }
-    // console.log(countries.length);
-    if (countries.length > 10) {
-        return (
-            <div>
-                Too many matches, specify another filter
-            </div>
-        )
-    }
-    if (countries.length > 1) {
-        return (
-            <div>
-                {countries.map((country) => {
-                    return (
-                        <div key={country.ccn3}>
-                            {country.name.common} <button onClick={() => { handleShow(country) }}>show</button>
-                        </div>
-                    )
-                })}
-            </div>
-        )
-    }
-    if (countries.length === 1) {
-        // Object.values(): object to array
-        return (
-            <CountryInfo country={countries[0]} />
-        )
-    }
-}
+import { useState, useEffect } from 'react'
+import Note from './components/Note'
+import noteService from './services/notes'
 
 const App = () => {
-    const [countries, setCountries] = useState([])
-    const [done, setDone] = useState(false)
-    const [search, setSearch] = useState('')
+    const [notes, setNotes] = useState([])
+    const [newNote, setNewNote] = useState('')
+    const [showAll, setShowAll] = useState(true)
 
     useEffect(() => {
-        axios
-            .get("https://restcountries.com/v3.1/all")
-            .then((response) => {
-                setCountries(response.data)
-                setDone(true)
+        noteService
+            .getAll()
+            .then(initialNotes => {
+                setNotes(initialNotes)
             })
     }, [])
 
-    const handleSearch = (event) => {
-        setSearch(event.target.value)
+    const addNote = (event) => {
+        event.preventDefault()
+        const noteObject = {
+            content: newNote,
+            date: new Date().toISOString(),
+            important: Math.random() > 0.5,
+            id: notes.length + 1,
+        }
+
+        noteService
+            .create(noteObject)
+            .then(returnedNote => {
+                setNotes(notes.concat(returnedNote))
+                setNewNote('')
+            })
     }
 
-    const countriesToShow = done ? countries.filter((country) => {
-        // console.log(country.name.common)    
-        return country.name.common.toLowerCase().includes(search.toLowerCase())
-    }) : []
-    // const countriesToShow = done?[countries[1]]:[];
-    // console.log(countriesToShow);
+    const handleNoteChange = (event) => {
+        setNewNote(event.target.value)
+    }
+
+    const notesToShow = showAll
+        ? notes
+        : notes.filter(note => note.important)
+
+    const toggleImportanceOf = id => {
+        const note = notes.find(n => n.id === id)
+        const changedNote = { ...note, important: !note.important }
+
+        noteService
+            .update(id, changedNote)
+            .then(returnedNote => {
+                setNotes(notes.map(note => note.id !== id ? note : returnedNote))
+            })
+            .catch(error => {
+                alert(
+                    `the note ${note.content} was already deleted from server`
+                )
+                setNotes(notes.filter(n => n.id !== id))
+                console.log(error)
+            })
+    }
 
     return (
         <div>
+            <h1>Notes</h1>
             <div>
-                find countries <input value={search} onChange={handleSearch} />
+                <button onClick={() => setShowAll(!showAll)}>
+                    show {showAll ? 'important' : 'all'}
+                </button>
             </div>
-            <ShowCountries countries={countriesToShow} />
+            <ul>
+                {notesToShow.map(note =>
+                    <Note
+                        key={note.id}
+                        note={note}
+                        toggleImportance={() => { toggleImportanceOf(note.id) }}
+                    />
+                )}
+            </ul>
+            <form onSubmit={addNote}>
+                <input
+                    value={newNote}
+                    onChange={handleNoteChange}
+                />
+                <button type="submit">save</button>
+            </form>
         </div>
     )
 }
