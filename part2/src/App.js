@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
-
-const serverUrl = "http://localhost:3001/persons"
+import phonebooks from './services/phonebooks'
 
 const Filter = ({ value, onChange }) => {
 
@@ -31,9 +29,13 @@ const PersonForm = ({ handleSubmit, newName, handleNameChange, newNumber, handle
 const Persons = ({ personsToShow }) => {
     return (
         <div>
-            {personsToShow.map((person) =>
-                <p key={person.name}>{person.name} {person.number}</p>
-            )}
+            {personsToShow.map((person) => {
+                return (
+                    <div key={person.name}>
+                        {person.name} {person.number}
+                    </div>
+                )
+            })}
         </div>
     )
 }
@@ -46,10 +48,10 @@ const App = () => {
     const [search, setSearch] = useState('')
 
     useEffect(() => {
-        axios
-            .get(serverUrl)
-            .then((response) => {
-                setPersons(response.data)
+        phonebooks
+            .getAll()
+            .then((data) => {
+                setPersons(data)
             })
     }, [])
 
@@ -74,12 +76,12 @@ const App = () => {
         } else if (isNumberRepeat) {
             alert(`${newNumber} is already added to phonebook`)
         } else {
-            const temp = { "name": newName, number: newNumber }
-            axios
-                .post(serverUrl, temp)
-                .then((res) => {
-                    // console.log(res.data)
-                    setPersons(persons.map((person) => person.name !== newName ? person : res.data))
+            const temp = { "name": newName, "number": newNumber }
+            phonebooks
+                .create(temp)
+                .then((data) => {
+                    // console.log(data)
+                    setPersons(persons.concat(data))
                 })
         }
         setNewName('')
