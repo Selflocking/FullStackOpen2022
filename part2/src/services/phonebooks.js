@@ -17,7 +17,6 @@ const create = (newObject) => {
 const remove = (id)=>{
     return axios
             .delete(`${serverUrl}/${id}`)
-            .then(res=>console.log(res))
 }
 
 // eslint-disable-next-line
