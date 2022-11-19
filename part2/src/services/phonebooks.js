@@ -14,14 +14,20 @@ const create = (newObject) => {
         .then(res => res.data)
 }
 
-const remove = (id)=>{
+const remove = (id) => {
     return axios
-            .delete(`${serverUrl}/${id}`)
+        .delete(`${serverUrl}/${id}`)
+}
+
+const change = (id, person) => {
+    return axios
+        .put(`${serverUrl}/${id}`, person)
 }
 
 // eslint-disable-next-line
 export default {
     getAll,
     create,
-    remove
+    remove,
+    change
 }

@@ -66,20 +66,34 @@ const App = () => {
             alert('Please enter the phone number')
             return;
         }
-        let isNameRepeat = false;
-        let isNumberRepeat = false;
+        let nameRepeat;
+        let numberRepeat;
         persons.forEach((person) => {
-            if (person.name === newName) isNameRepeat = true
-            if (person.number === newNumber) isNumberRepeat = true
+            if (person.name === newName) nameRepeat = person.id
+            if (person.number === newNumber) numberRepeat = person.id
         })
-        if (isNameRepeat) {
-            alert(`${newName} is already added to phonebook`)
-        } else if (isNumberRepeat) {
-            alert(`${newNumber} is already added to phonebook`)
+        if (nameRepeat !== undefined) {
+            // alert(`${newName} is already added to phonebook`)
+            if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+                phonebooks
+                    .change(nameRepeat, { "name": newName, "number": newNumber })
+                    .then(res => {
+                        setPersons(persons.map(person => person.id !== nameRepeat ? person : res.data))
+                    })
+            }
+        } else if (numberRepeat !== undefined) {
+            // alert(`${newNumber} is already added to phonebook`)
+            if (window.confirm(`${newNumber} is already added to phonebook, replace the old name with a new one?`)) {
+                phonebooks
+                    .change(numberRepeat, { "name": newName, "number": newNumber })
+                    .then(res => {
+                        setPersons(person => person.id !== numberRepeat ? person : res.data)
+                    })
+            }
         } else {
-            const temp = { "name": newName, "number": newNumber }
+            // const temp = { "name": newName, "number": newNumber }
             phonebooks
-                .create(temp)
+                .create({ "name": newName, "number": newNumber })
                 .then((data) => {
                     // console.log(data)
                     setPersons(persons.concat(data))
