@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import phonebooks from './services/phonebooks'
+import "./App.css"
 
 const Filter = ({ value, onChange }) => {
 
@@ -41,12 +42,26 @@ const Persons = ({ personsToShow, handleDeletePerson }) => {
     )
 }
 
+const Notification = ({ message, className }) => {
+    if (message === '') {
+        return null;
+    }
+
+    return (
+        <div className={className}>
+            {message}
+        </div>
+    )
+}
+
 const App = () => {
     const [persons, setPersons] = useState([])
 
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [search, setSearch] = useState('')
+    const [errorMessage, setErrorMessage] = useState('');
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         phonebooks
@@ -79,6 +94,10 @@ const App = () => {
                     .change(nameRepeat, { "name": newName, "number": newNumber })
                     .then(res => {
                         setPersons(persons.map(person => person.id !== nameRepeat ? person : res.data))
+                        setMessage(`${newNumber}'name has been changed`)
+                        setTimeout(() => {
+                            setMessage('');
+                        }, 5000)
                     })
             }
         } else if (numberRepeat !== undefined) {
@@ -88,6 +107,10 @@ const App = () => {
                     .change(numberRepeat, { "name": newName, "number": newNumber })
                     .then(res => {
                         setPersons(person => person.id !== numberRepeat ? person : res.data)
+                        setMessage(`${newName}' number has been changed`)
+                        setTimeout(() => {
+                            setMessage('');
+                        }, 5000)
                     })
             }
         } else {
@@ -97,6 +120,10 @@ const App = () => {
                 .then((data) => {
                     // console.log(data)
                     setPersons(persons.concat(data))
+                    setMessage(`Add ${newName}`)
+                    setTimeout(() => {
+                        setMessage('');
+                    }, 5000)
                 })
         }
         setNewName('')
@@ -132,6 +159,8 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            <Notification message={errorMessage} className="error" />
+            <Notification message={message} className="message" />
             <Filter value={search} onChange={handleSearchChange} />
             <h3>add a new</h3>
             <PersonForm
