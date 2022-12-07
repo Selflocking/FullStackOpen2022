@@ -68,6 +68,11 @@ const App = () => {
             .getAll()
             .then((data) => {
                 setPersons(data)
+            }).catch(() => {
+                setErrorMessage("Error occurred")
+                setTimeout(() => {
+                    setErrorMessage('')
+                }, 5000)
             })
     }, [])
 
@@ -98,6 +103,16 @@ const App = () => {
                         setTimeout(() => {
                             setMessage('');
                         }, 5000)
+                    }).catch((error) => {
+                        // console.log(error);
+                        if (error.response.status === 404) {
+                            setErrorMessage(`Information of ${newName} has been removed from server`)
+                        } else {
+                            setErrorMessage("Error occurred")
+                        }
+                        setTimeout(() => {
+                            setErrorMessage('')
+                        }, 5000)
                     })
             }
         } else if (numberRepeat !== undefined) {
@@ -111,6 +126,16 @@ const App = () => {
                         setTimeout(() => {
                             setMessage('');
                         }, 5000)
+                    }).catch((error) => {
+                        // console.log(error);
+                        if (error.response.status === 404) {
+                            setErrorMessage(`Information of ${newName} has been removed from server`)
+                        } else {
+                            setErrorMessage("Error occurred")
+                        }
+                        setTimeout(() => {
+                            setErrorMessage('')
+                        }, 5000)
                     })
             }
         } else {
@@ -123,6 +148,11 @@ const App = () => {
                     setMessage(`Add ${newName}`)
                     setTimeout(() => {
                         setMessage('');
+                    }, 5000)
+                }).catch(() => {
+                    setErrorMessage("Error occurred")
+                    setTimeout(() => {
+                        setErrorMessage('')
                     }, 5000)
                 })
         }
@@ -151,6 +181,11 @@ const App = () => {
                 .then((res) => {
                     // console.log(res)
                     setPersons(persons.filter(item => item.id !== person.id))
+                }).catch(() => {
+                    setErrorMessage("Error occurred")
+                    setTimeout(() => {
+                        setErrorMessage('')
+                    }, 5000)
                 })
         }
     }
