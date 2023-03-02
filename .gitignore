@@ -2,3 +2,4 @@
 .vscode/
 .fleet/
 test/
+node_modules/
