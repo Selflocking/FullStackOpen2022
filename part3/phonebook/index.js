@@ -58,6 +58,25 @@ app.post("/api/persons", (req, res) => {
     });
   }
 
+  if (!body.name) {
+    return res.status(400).json({
+      error: "name missing",
+    });
+  }
+
+  if (!body.number) {
+    return res.status(400).json({
+      error: "number missing",
+    });
+  }
+
+  found = phonebook.find((item) => item.name === body.name);
+  if (found) {
+    return res.status(400).json({
+      error: "name has exist",
+    });
+  }
+
   const item = {
     id: generateId(),
     name: body.name,
