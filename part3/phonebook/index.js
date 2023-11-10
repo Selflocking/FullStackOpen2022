@@ -2,8 +2,18 @@ const express = require("express");
 const morgan = require("morgan");
 const app = express();
 
+morgan.token("data", (req, res) => {
+  if (req.method !== "POST") {
+    return "";
+  } else {
+    return JSON.stringify(req.body);
+  }
+});
+
 app.use(express.json());
-app.use(morgan("tiny"));
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms :data")
+);
 
 // 定义端口
 const POST = 3001;
