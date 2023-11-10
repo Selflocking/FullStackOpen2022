@@ -26,6 +26,15 @@ app.get("/api/persons", (req, res) => {
   return res.send(phonebook);
 });
 
+app.get("/api/info", (req, res) => {
+  const sum = phonebook.length;
+  let date = new Date();
+
+  let result = `<p>Phonebook has info for ${sum} people</p>`;
+  result = result.concat("\n" + date.toString());
+  res.send(result);
+});
+
 app.listen(POST, () => {
   console.log(`Example app listening on port ${POST}`);
 });
