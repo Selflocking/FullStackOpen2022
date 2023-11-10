@@ -26,6 +26,17 @@ app.get("/api/persons", (req, res) => {
   return res.send(phonebook);
 });
 
+app.get("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const item = phonebook.filter((item) => item.id === id);
+  if (item.length > 0) {
+    res.json(item);
+  } else {
+    res.status(404);
+    res.send(`<p>Not found this id: ${id} person"</p>`);
+  }
+});
+
 app.get("/api/info", (req, res) => {
   const sum = phonebook.length;
   let date = new Date();
