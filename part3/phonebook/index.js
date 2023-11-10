@@ -37,6 +37,12 @@ app.get("/api/persons/:id", (req, res) => {
   }
 });
 
+app.delete("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  phonebook = phonebook.filter((item) => item.id !== id);
+  res.status(200).end();
+});
+
 app.get("/api/info", (req, res) => {
   const sum = phonebook.length;
   let date = new Date();
