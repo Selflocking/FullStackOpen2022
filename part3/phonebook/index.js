@@ -43,6 +43,32 @@ app.delete("/api/persons/:id", (req, res) => {
   res.status(200).end();
 });
 
+const generateId = () => {
+  const min = 1;
+  const max = 1000000;
+  return Math.floor(Math.random() * (max - min) + min);
+};
+
+app.post("/api/persons", (req, res) => {
+  const body = req.body;
+
+  if (!body) {
+    return res.status(400).json({
+      msg: "error",
+    });
+  }
+
+  const item = {
+    id: generateId(),
+    name: body.name,
+    number: body.number,
+  };
+
+  phonebook = phonebook.concat(item);
+
+  res.status(200).end();
+});
+
 app.get("/api/info", (req, res) => {
   const sum = phonebook.length;
   let date = new Date();
