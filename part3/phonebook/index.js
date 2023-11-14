@@ -1,7 +1,9 @@
+require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
+const Phone = require("./models/phone");
 
 morgan.token("data", (req, res) => {
   if (req.method !== "POST") {
@@ -19,49 +21,26 @@ app.use(
 );
 
 // 定义端口
-const POST = 3001;
-
-let phonebook = require("./phonebook.json");
-
-app.get("/", (req, res) => {
-  let index = `
-<h3>Phone Book</h3>
-<ul>
-${phonebook
-  .map((item) => `<li>name: ${item.name} number: ${item.number}</li>`)
-  .join("\n")}
-</ul>
-`;
-
-  res.send(index);
-});
+const PORT = process.env.PORT || 3001;
 
 app.get("/api/persons", (req, res) => {
-  return res.send(phonebook);
+  Phone.find({}).then((phones) => {
+    res.json(phones);
+  });
 });
 
 app.get("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const item = phonebook.filter((item) => item.id === id);
-  if (item.length > 0) {
-    res.json(item);
-  } else {
-    res.status(404);
-    res.send(`<p>Not found this id: ${id} person"</p>`);
-  }
+  Phone.findById(req.params.id).then((phone) => {
+    res.json(phone);
+  });
 });
 
 app.delete("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  phonebook = phonebook.filter((item) => item.id !== id);
-  res.status(200).end();
+  Phone.findByIdAndDelete(req.params.id).then((phone) => {
+    res.json(phone);
+    res.status(200).end();
+  });
 });
-
-const generateId = () => {
-  const min = 1;
-  const max = 1000000;
-  return Math.floor(Math.random() * (max - min) + min);
-};
 
 app.post("/api/persons", (req, res) => {
   const body = req.body;
@@ -84,26 +63,18 @@ app.post("/api/persons", (req, res) => {
     });
   }
 
-  found = phonebook.find((item) => item.name === body.name);
-  if (found) {
-    return res.status(400).json({
-      error: "name has exist",
-    });
-  }
-
-  const item = {
-    id: generateId(),
+  const phone = new Phone({
     name: body.name,
     number: body.number,
-  };
+  });
 
-  phonebook = phonebook.concat(item);
-
-  res.send(item);
+  phone.save().then((savedPhone) => {
+    res.json(savedPhone);
+  });
 });
 
 app.get("/api/info", (req, res) => {
-  const sum = phonebook.length;
+  const sum = Phone.count();
   let date = new Date();
 
   let result = `<p>Phonebook has info for ${sum} people</p>`;
@@ -111,6 +82,6 @@ app.get("/api/info", (req, res) => {
   res.send(result);
 });
 
-app.listen(POST, () => {
-  console.log(`Example app listening on port ${POST}`);
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`);
 });
