@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 const Phone = require("./models/phone");
 
-morgan.token("data", (req, res) => {
+morgan.token("data", (req) => {
   if (req.method !== "POST") {
     return "";
   } else {
@@ -26,8 +26,6 @@ const errorHandler = (error, request, response, next) => {
   } else if (error.name === "ValidationError") {
     return response.status(400).json({ error: error.message });
   } else if (error.name === "MongoServerError") {
-    return response.status(400).json({ error: error.message });
-  } else {
     return response.status(400).json({ error: error.message });
   }
 
@@ -85,9 +83,9 @@ app.put("/api/persons/:id", (req, res, next) => {
     .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res, next) => {
   Phone.findByIdAndDelete(req.params.id)
-    .then((phone) => {
+    .then(() => {
       res.status(204).end();
     })
     .catch((error) => {

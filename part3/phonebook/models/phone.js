@@ -4,7 +4,7 @@ const url = process.env.MONGODB_URI;
 
 mongoose
   .connect(url)
-  .then((result) => {
+  .then(() => {
     console.log("connected to MongoDB");
   })
   .catch((error) => {
@@ -21,11 +21,10 @@ const phoneSchema = new mongoose.Schema({
   number: {
     type: String,
     minlength: 8,
-    validate: (n) => {
-      n = String(n);
-      ns = n.split("-");
-      p = Number(ns[0]);
-      a = Number(ns[1]);
+    validate: function (number) {
+      const ns = number.split("-");
+      Number(ns[0]);
+      Number(ns[1]);
       if (ns[0].length != 2 && ns[0].length != 3) {
         return false;
       }

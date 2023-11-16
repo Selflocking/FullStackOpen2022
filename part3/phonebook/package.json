@@ -7,7 +7,8 @@
     "start": "node index.js",
     "front": "bash ./frontend-build.sh",
     "dev": "nodemon index.js",
-    "test": "node index.js"
+    "test": "node index.js",
+    "lint": "eslint ."
   },
   "author": "YunShu",
   "license": "MIT",
@@ -18,5 +19,8 @@
     "mongoose": "^8.0.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.53.0"
   }
 }
