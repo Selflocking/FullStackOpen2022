@@ -4,7 +4,6 @@ const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
 const Phone = require("./models/phone");
-const phone = require("./models/phone");
 
 morgan.token("data", (req, res) => {
   if (req.method !== "POST") {
@@ -19,10 +18,17 @@ const requestLogger = morgan(
 );
 
 const errorHandler = (error, request, response, next) => {
+  console.log(error.name);
   console.error(error.message);
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
+  } else if (error.name === "MongoServerError") {
+    return response.status(400).json({ error: error.message });
+  } else {
+    return response.status(400).json({ error: error.message });
   }
 
   next(error);
@@ -63,12 +69,10 @@ app.get("/api/persons/:id", (req, res, next) => {
 
 app.put("/api/persons/:id", (req, res, next) => {
   const body = req.body;
-  Phone.findOneAndUpdate(
-    { name: body.name },
-    { number: body.number },
-    {
-      returnDocument: "after",
-    }
+  Phone.findByIdAndUpdate(
+    req.params.id,
+    { name: body.name, number: body.number },
+    { runValidators: true, context: "query", returnDocument: "after" }
   )
     .then((phone) => {
       if (phone) {
@@ -116,9 +120,13 @@ app.post("/api/persons", (req, res, next) => {
     name: body.name,
     number: body.number,
   });
-  phone.save().then((savedPhone) => {
-    res.json(savedPhone);
-  });
+
+  phone
+    .save()
+    .then((savedPhone) => {
+      res.json(savedPhone);
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/api/info", (req, res) => {

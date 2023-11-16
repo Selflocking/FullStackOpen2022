@@ -12,8 +12,27 @@ mongoose
   });
 
 const phoneSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    minlength: 3,
+    unique: true,
+    required: true,
+  },
+  number: {
+    type: String,
+    minlength: 8,
+    validate: (n) => {
+      n = String(n);
+      ns = n.split("-");
+      p = Number(ns[0]);
+      a = Number(ns[1]);
+      if (ns[0].length != 2 && ns[0].length != 3) {
+        return false;
+      }
+      return true;
+    },
+    required: true,
+  },
 });
 
 phoneSchema.set("toJSON", {
